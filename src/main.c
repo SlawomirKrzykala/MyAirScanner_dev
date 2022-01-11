@@ -20,6 +20,9 @@
 #define DELAY_MEASUREMENT       2000 // delay between next measurment
 #define MAX_NUM_MEASUREMENT     10 // max number measurment to avg
 #define MAX_NUM_TRY_MEASUREMENT 60 // max number try measurment (number = sum of sucess measurment and fail measurment)
+
+#define ENCODE_MID_BYTE(high4bits, low4bits) ( ((uint8_t)high4bits<<4) | (((uint8_t)(low4bits>>8))&0x0F) )
+
 static const char *TAG = "DHT";
 
 struct __attribute__((__packed__)) PayloadMeasurement  {
@@ -133,15 +136,15 @@ void make_adv_data(const dht_measurement_t *dht_value_1h, const pms_measurement_
         .humidity=dht_value_1h->humidity,
 
         .pm[0]=(uint8_t)(pms_value_1h->sm.pm10>>4),
-        .pm[1]=((uint8_t)pms_value_1h->sm.pm10<<4) | (((uint8_t)(pms_value_1h->sm.pm25>>8))&0x0F),
+        .pm[1]=ENCODE_MID_BYTE(pms_value_1h->sm.pm10, pms_value_1h->sm.pm25),
         .pm[2]=(uint8_t)pms_value_1h->sm.pm25,
         
         .pm[3]=(uint8_t)(pms_value_1h->sm.pm100>>4),
-        .pm[4]=((uint8_t)pms_value_1h->sm.pm100<<4) | (((uint8_t)(pms_value_1h->ae.pm10>>8))&0x0F),
+        .pm[4]=ENCODE_MID_BYTE(pms_value_1h->sm.pm100, pms_value_1h->ae.pm10),
         .pm[5]=(uint8_t)pms_value_1h->ae.pm10,
 
         .pm[6]=(uint8_t)(pms_value_1h->ae.pm25>>4),
-        .pm[7]=((uint8_t)pms_value_1h->ae.pm25<<4) | (((uint8_t)(pms_value_1h->ae.pm100>>8))&0x0F),
+        .pm[7]=ENCODE_MID_BYTE(pms_value_1h->ae.pm25, pms_value_1h->ae.pm100),
         .pm[8]=(uint8_t)pms_value_1h->ae.pm100,
 
 
